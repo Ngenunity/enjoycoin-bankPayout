@@ -14,7 +14,7 @@ exports.handler = async (event, context, callback) => {
     const accountId = event.arguments.accountId;
     const bankAccountId = event.arguments.bankAccountId;
     const timestampOne = new Date().getTime();
-    const walletUrl = `https://docs.sendwyre.com/docs/lookup-wallet?timestamp=${timestampOne}`
+    const walletUrl = ` https://api.testwyre.com/v2/wallet?timestamp=${timestampOne}`
 
     let secretObj;
 
@@ -62,7 +62,7 @@ exports.handler = async (event, context, callback) => {
 
       // Transfer ETH to destination
       const timestampTwo = new Date().getTime();
-      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp${timestampTwo}`;
+      const transferUrl = `https://api.testwyre.com/v3/transfers?timestamp${timestampTwo}`;
       
       // Calculate request signature
       const signature = (url, data) => {
