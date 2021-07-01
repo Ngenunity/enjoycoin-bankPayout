@@ -11,11 +11,8 @@ var secretClient = new aws.SecretsManager({
 
 exports.handler = async (event, context, callback) => {
   try {
-    const accountId = event.arguments.accountId;
     const bankAccountId = event.arguments.bankAccountId;
-    const timestampOne = new Date().getTime();
-    const walletUrl = ` https://api.sendwyre.com/v2/wallet?timestamp=${timestampOne}`
-
+    const walletId = event.arguments.defaultWalletId;
     let secretObj;
 
     const secretRes = await secretClient
@@ -26,89 +23,54 @@ exports.handler = async (event, context, callback) => {
       secretObj = JSON.parse(secretRes.SecretString);
     }
 
-      // Calculate account request signature
-      const accSignature = (url, data) => {
-        const dataToBeSigned = url + data;
-        const token = cryptojs.enc.Hex.stringify(
-          cryptojs.HmacSHA256(
-            dataToBeSigned.toString(cryptojs.enc.Utf8),
-            secretObj.wyreSecret
-          )
-        );
-        return token;
-      };
+    // Transfer ETH to destination
+    const timestamp = new Date().getTime();
+    const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp${timestamp}`;
 
-      const walletBody = {
-        name: accountId
-      };
+    // Calculate request signature
+    const signature = (url, data) => {
+      const dataToBeSigned = url + data;
+      const token = cryptojs.enc.Hex.stringify(
+        cryptojs.HmacSHA256(
+          dataToBeSigned.toString(cryptojs.enc.Utf8),
+          secretObj.wyreSecret
+        )
+      );
+      return token;
+    };
 
-      const walletDetails = JSON.stringify(walletBody);
+    const body = {
+      source: `wallet:${walletId}`,
+      sourceCurrency: "ETH",
+      sourceAmount: sourceAmount,
+      dest: `paymentmethod:${bankAccountId}`,
+      destCurrency: "USD",
+      autoConfirm: true,
+    };
 
-      // Set request headers
-      const headers = {};
-      headers["Content-Type"] = "application/json";
-      headers["X-Api-Key"] = secretObj.wyreAPI;
-      headers["X-Api-Signature"] = accSignature(walletUrl, walletDetails);
+    const details = JSON.stringify(body);
+    const transferHeaders = {};
+    transferHeaders["Content-Type"] = "application/json";
+    transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
+    transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
 
-      const config = {
-        method: "GET",
-        url: walletUrl,
-        headers: headers,
-      };
+    const transferConfig = {
+      method: "POST",
+      url: transferUrl,
+      headers: transfersHeaders,
+      data: details,
+    };
 
-      // Get user wallet id
-      const walletResponse = await axios(config);
-      walletId = walletResponse.id;
+    const transferResponse = await axios(transferConfig);
+    console.log(transferResponse);
 
-      // Transfer ETH to destination
-      const timestampTwo = new Date().getTime();
-      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp${timestampTwo}`;
-      
-      // Calculate request signature
-      const signature = (url, data) => {
-        const dataToBeSigned = url + data;
-        const token = cryptojs.enc.Hex.stringify(
-          cryptojs.HmacSHA256(
-            dataToBeSigned.toString(cryptojs.enc.Utf8),
-            secretObj.wyreSecret
-          )
-        );
-        return token;
-      };
-
-      const body = {
-        source: `wallet:${walletId}`,
-        sourceCurrency: "ETH",
-        sourceAmount: sourceAmount,
-        dest: `paymentmethod:${bankAccountId}`,
-        destCurrency: "USD",
-        autoConfirm: true
-      };
-
-      const details = JSON.stringify(body);
-      const transferHeaders = {};
-      transferHeaders["Content-Type"] = "application/json";
-      transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
-
-      const transferConfig = {
-        method: "POST",
-        url: transferUrl,
-        headers: transfersHeaders,
-        data: details
-      };
-
-      const transferResponse = await axios(transferConfig);
-      console.log(transferResponse);
-
-      callback(null, {
-          id: transferResponse.id,
-          status: transferResponse.status,
-          sourceAmount: transferResponse.sourceAmount,
-          source: transferResponse.source,
-          dest: transferResponse.dest
-      });
-
+    callback(null, {
+      id: transferResponse.id,
+      status: transferResponse.status,
+      sourceAmount: transferResponse.sourceAmount,
+      source: transferResponse.source,
+      dest: transferResponse.dest,
+    });
   } catch (err) {
     console.log(err);
     //Create callback for errors
