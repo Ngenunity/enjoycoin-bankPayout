@@ -58,7 +58,7 @@ exports.handler = async (event, context, callback) => {
     const transferConfig = {
       method: "POST",
       url: transferUrl,
-      headers: transfersHeaders,
+      headers: transferHeaders,
       data: details,
     };
 
