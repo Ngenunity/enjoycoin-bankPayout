@@ -13,6 +13,7 @@ exports.handler = async (event, context, callback) => {
   try {
     const bankAccountId = event.arguments.bankAccountId;
     const walletId = event.arguments.defaultWalletId;
+    const sourceAmount = event.arguments.sourceAmount;
     let secretObj;
 
     const secretRes = await secretClient
