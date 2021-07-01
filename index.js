@@ -66,11 +66,11 @@ exports.handler = async (event, context, callback) => {
     console.log(transferResponse);
 
     callback(null, {
-      id: transferResponse.id,
+      id: transferResponse.data.id,
       status: transferResponse.status,
-      sourceAmount: transferResponse.sourceAmount,
-      source: transferResponse.source,
-      dest: transferResponse.dest,
+      sourceAmount: transferResponse.data.sourceAmount,
+      source: transferResponse.data.source,
+      dest: transferResponse.data.dest,
     });
   } catch (err) {
     console.log(err);
