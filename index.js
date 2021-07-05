@@ -10,70 +10,72 @@ var secretClient = new aws.SecretsManager({
 });
 
 exports.handler = async (event, context, callback) => {
-  try {
-    const bankAccountId = event.arguments.bankAccountId;
-    const walletId = event.arguments.defaultWalletId;
-    const sourceAmount = event.arguments.sourceAmount;
-    let secretObj;
+  if (event.field == "bankPayout") {
+    try {
+      const bankAccountId = event.arguments.bankAccountId;
+      const walletId = event.arguments.defaultWalletId;
+      const sourceAmount = event.arguments.sourceAmount;
+      let secretObj;
 
-    const secretRes = await secretClient
-      .getSecretValue({ SecretId: secretName })
-      .promise();
+      const secretRes = await secretClient
+        .getSecretValue({ SecretId: secretName })
+        .promise();
 
-    if ("SecretString" in secretRes) {
-      secretObj = JSON.parse(secretRes.SecretString);
+      if ("SecretString" in secretRes) {
+        secretObj = JSON.parse(secretRes.SecretString);
+      }
+
+      // Transfer ETH to destination
+      const timestamp = new Date().getTime();
+      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}`;
+
+      // Calculate request signature
+      const signature = (url, data) => {
+        const dataToBeSigned = url + data;
+        const token = cryptojs.enc.Hex.stringify(
+          cryptojs.HmacSHA256(
+            dataToBeSigned.toString(cryptojs.enc.Utf8),
+            secretObj.wyreSecret
+          )
+        );
+        return token;
+      };
+
+      const body = {
+        source: `wallet:${walletId}`,
+        sourceCurrency: "ETH",
+        sourceAmount: sourceAmount,
+        dest: `paymentmethod:${bankAccountId}`,
+        destCurrency: "USD",
+        autoConfirm: true,
+      };
+
+      const details = JSON.stringify(body);
+      const transferHeaders = {};
+      transferHeaders["Content-Type"] = "application/json";
+      transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
+      transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
+
+      const transferConfig = {
+        method: "POST",
+        url: transferUrl,
+        headers: transferHeaders,
+        data: details,
+      };
+
+      const transferResponse = await axios(transferConfig);
+      console.log(transferResponse);
+
+      callback(null, {
+        id: transferResponse.data.id,
+        status: transferResponse.status,
+        sourceAmount: transferResponse.data.sourceAmount,
+        source: transferResponse.data.source,
+        dest: transferResponse.data.dest,
+      });
+    } catch (err) {
+      console.log(err);
+      //Create callback for errors
     }
-
-    // Transfer ETH to destination
-    const timestamp = new Date().getTime();
-    const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}`;
-
-    // Calculate request signature
-    const signature = (url, data) => {
-      const dataToBeSigned = url + data;
-      const token = cryptojs.enc.Hex.stringify(
-        cryptojs.HmacSHA256(
-          dataToBeSigned.toString(cryptojs.enc.Utf8),
-          secretObj.wyreSecret
-        )
-      );
-      return token;
-    };
-
-    const body = {
-      source: `wallet:${walletId}`,
-      sourceCurrency: "ETH",
-      sourceAmount: sourceAmount,
-      dest: `paymentmethod:${bankAccountId}`,
-      destCurrency: "USD",
-      autoConfirm: true,
-    };
-
-    const details = JSON.stringify(body);
-    const transferHeaders = {};
-    transferHeaders["Content-Type"] = "application/json";
-    transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
-    transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
-
-    const transferConfig = {
-      method: "POST",
-      url: transferUrl,
-      headers: transferHeaders,
-      data: details,
-    };
-
-    const transferResponse = await axios(transferConfig);
-    console.log(transferResponse);
-
-    callback(null, {
-      id: transferResponse.data.id,
-      status: transferResponse.status,
-      sourceAmount: transferResponse.data.sourceAmount,
-      source: transferResponse.data.source,
-      dest: transferResponse.data.dest,
-    });
-  } catch (err) {
-    console.log(err);
-    //Create callback for errors
   }
 };
