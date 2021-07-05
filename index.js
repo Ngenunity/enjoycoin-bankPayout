@@ -42,7 +42,7 @@ exports.handler = async (event, context, callback) => {
       };
 
       const body = {
-        source: `wallet:${walletId}`,
+        source: `wallet:${walletId}:ach`,
         sourceCurrency: "ETH",
         sourceAmount: sourceAmount,
         dest: `paymentmethod:${bankAccountId}`,
