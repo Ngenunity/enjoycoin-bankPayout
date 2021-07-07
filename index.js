@@ -48,7 +48,7 @@ exports.handler = async (event, context, callback) => {
         sourceAmount: sourceAmount,
         dest: `paymentmethod:${bankAccountId}`,
         destCurrency: "USD",
-        autoConfirm: true,
+        autoConfirm: false,
       };
 
       const details = JSON.stringify(body);
