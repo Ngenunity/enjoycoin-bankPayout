@@ -54,8 +54,9 @@ exports.handler = async (event, context, callback) => {
       const details = JSON.stringify(body);
       const transferHeaders = {};
       transferHeaders["Content-Type"] = "application/json";
-      transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
+      transferHeaders["Authorization"] = `Bearer ${secretObj.wyreSecret}`;
+      //transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
+      //transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
 
       const transferConfig = {
         method: "POST",
