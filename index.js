@@ -65,13 +65,13 @@ exports.handler = async (event, context, callback) => {
         data: accDetails,
       };
 
-      const accTransferResponse = await axios(accConfig);
-      console.log(accTransferResponse);
+      //const accTransferResponse = await axios(accConfig);
+      //console.log(accTransferResponse);
 
       const body = {
         source: `account:${wyreId}`,
         sourceCurrency: "USD",
-        sourceAmount: accTransferResponse.data.destAmount,
+        sourceAmount: 20,
         dest: `paymentmethod:${bankAccountId}`,
         destCurrency: "USD",
         autoConfirm: true,
@@ -90,11 +90,15 @@ exports.handler = async (event, context, callback) => {
         data: details,
       };
 
+      const transferResponse = await axios(transferConfig);
+      console.log(transferResponse);
+
+      /*
       if (accTransferResponse.status == 200) {
         console.log("Wallet to account transfer was successful!");
         const transferResponse = await axios(transferConfig);
         console.log(transferResponse);
-      }
+      }*/
 
       callback(null, {
         id: transferResponse.data.id,
