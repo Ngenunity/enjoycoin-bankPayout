@@ -58,7 +58,14 @@ exports.handler = async (event, context, callback) => {
       accHeaders["X-Api-Key"] = secretObj.wyreAPI;
       accHeaders["X-Api-Signature"] = signature(accTransferUrl, accDetails);
 
-      const accTransferResponse = await axios(transferConfig);
+      const accConfig = {
+        method: "POST",
+        url: accTransferUrl,
+        headers: accHeaders,
+        data: accDetails,
+      };
+
+      const accTransferResponse = await axios(accConfig);
       console.log(accTransferResponse);
 
       const body = {
