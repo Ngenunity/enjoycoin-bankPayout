@@ -29,7 +29,7 @@ exports.handler = async (event, context, callback) => {
       // Transfer ETH to destination
       const timestamp = new Date().getTime();
       const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}`;
-      //const accTransferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}?masqueradeAs=${wyreId}`;
+      const accTransferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}?masqueradeAs=${wyreId}`;
 
       // Calculate request signature
       const signature = (url, data) => {
@@ -81,11 +81,11 @@ exports.handler = async (event, context, callback) => {
       const transferHeaders = {};
       transferHeaders["Content-Type"] = "application/json";
       transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
+      transferHeaders["X-Api-Signature"] = signature(accTransferUrl, details);
 
       const transferConfig = {
         method: "POST",
-        url: transferUrl,
+        url: accTransferUrl,
         headers: transferHeaders,
         data: details,
       };
