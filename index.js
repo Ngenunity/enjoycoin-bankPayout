@@ -29,7 +29,7 @@ exports.handler = async (event, context, callback) => {
       // Transfer ETH to destination
       const timestamp = new Date().getTime();
       const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}`;
-      const accTransferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}?masqueradeAs=${wyreId}`;
+      //const accTransferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}?masqueradeAs=${wyreId}`;
 
       // Calculate request signature
       const signature = (url, data) => {
@@ -85,7 +85,7 @@ exports.handler = async (event, context, callback) => {
 
       const transferConfig = {
         method: "POST",
-        url: accTransferUrl,
+        url: transferUrl,
         headers: transferHeaders,
         data: details,
       };
