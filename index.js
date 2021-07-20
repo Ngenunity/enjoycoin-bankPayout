@@ -56,11 +56,11 @@ exports.handler = async (event, context, callback) => {
       const accHeaders = {};
       accHeaders["Content-Type"] = "application/json";
       accHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      accHeaders["X-Api-Signature"] = signature(accTransferUrl, accDetails);
+      accHeaders["X-Api-Signature"] = signature(transferUrl, accDetails);
 
       const accConfig = {
         method: "POST",
-        url: accTransferUrl,
+        url: transferUrl,
         headers: accHeaders,
         data: accDetails,
       };
@@ -81,11 +81,11 @@ exports.handler = async (event, context, callback) => {
       const transferHeaders = {};
       transferHeaders["Content-Type"] = "application/json";
       transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
+      transferHeaders["X-Api-Signature"] = signature(accTransferUrl, details);
 
       const transferConfig = {
         method: "POST",
-        url: transferUrl,
+        url: accTransferUrl,
         headers: transferHeaders,
         data: details,
       };
