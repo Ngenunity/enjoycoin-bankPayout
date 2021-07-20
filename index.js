@@ -28,7 +28,7 @@ exports.handler = async (event, context, callback) => {
 
       // Transfer ETH to destination
       const timestamp = new Date().getTime();
-      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}&masqueradeAs=${wyreId}`;
+      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}`;
 
       // Calculate request signature
       const signature = (url, data) => {
