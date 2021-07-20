@@ -71,7 +71,7 @@ exports.handler = async (event, context, callback) => {
       const body = {
         source: `account:${wyreId}`,
         sourceCurrency: "USD",
-        sourceAmount: sourceAmount,
+        sourceAmount: accTransferResponse.data.destAmount,
         dest: `paymentmethod:${bankAccountId}`,
         destCurrency: "USD",
         autoConfirm: true,
