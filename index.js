@@ -67,7 +67,7 @@ exports.handler = async (event, context, callback) => {
       const accConfig = {
         method: "GET",
         url: accountUrl,
-        headers: headers,
+        headers: accHeaders,
       };
 
       const accResponse = await axios(accConfig);
