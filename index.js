@@ -31,7 +31,8 @@ exports.handler = async (event, context, callback) => {
       const timestampTwo = new Date().getTime();
       const timestampThree = new Date().getTime();
       const paymentUrl = `https://api.sendwyre.com/v2/paymentMethod/${bankAccountId}?timestamp=${timestampTwo}&masqueradeAs=${wyreId}`;
-      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}&masqueradeAs=${wyreId}`;
+      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestampThree}`;
+      const payoutUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestampThree}&masqueradeAs=${wyreId}`;
       const accountUrl = `https://api.sendwyre.com/v3/accounts/${wyreId}?masqueradeAs=${wyreId}&timestamp=${timestamp}`;
 
       // Calculate request signature
@@ -131,11 +132,11 @@ exports.handler = async (event, context, callback) => {
       const payoutHeaders = {};
       payoutHeaders["Content-Type"] = "application/json";
       payoutHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      payoutHeaders["X-Api-Signature"] = signature(transferUrl, payoutDetails);
+      payoutHeaders["X-Api-Signature"] = signature(payoutUrl, payoutDetails);
 
       const payoutConfig = {
         method: "POST",
-        url: transferUrl,
+        url: payoutUrl,
         headers: payoutHeaders,
         data: payoutDetails,
       };
