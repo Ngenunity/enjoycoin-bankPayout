@@ -73,6 +73,7 @@ exports.handler = async (event, context, callback) => {
       const accResponse = await axios(accConfig);
       console.log(accResponse);
       let accEthAddress = accResponse.data.depositAddresses.ETH;
+      console.log("Account ETH address", accEthAddress);
 
       let bankEthAddress;
 
