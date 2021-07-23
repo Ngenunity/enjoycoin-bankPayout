@@ -71,7 +71,8 @@ exports.handler = async (event, context, callback) => {
       };
 
       const accResponse = await axios(accConfig);
-      let accEthAddress = accResponse.depositAddresses.ETH;
+      console.log(accResponse);
+      let accEthAddress = accResponse.data.depositAddresses.ETH;
 
       let bankEthAddress;
 
@@ -125,7 +126,7 @@ exports.handler = async (event, context, callback) => {
         autoConfirm: true,
       };
 
-      const payoutDetails = JSON.stringify(body);
+      const payoutDetails = JSON.stringify(payoutBody);
       const payoutHeaders = {};
       payoutHeaders["Content-Type"] = "application/json";
       payoutHeaders["X-Api-Key"] = secretObj.wyreAPI;
