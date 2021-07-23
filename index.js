@@ -117,11 +117,11 @@ exports.handler = async (event, context, callback) => {
         data: details,
       };
 
-      const transferResponse = await axios(transferConfig);
-      console.log(transferResponse);
+      //const transferResponse = await axios(transferConfig);
+      //console.log(transferResponse);
 
       const payoutBody = {
-        source: `account:${wyreId}`,
+        source: `wallet:${walletId}`,
         sourceCurrency: "ETH",
         sourceAmount: sourceAmount,
         dest: `ethereum:${bankEthAddress}`,
@@ -133,11 +133,11 @@ exports.handler = async (event, context, callback) => {
       const payoutHeaders = {};
       payoutHeaders["Content-Type"] = "application/json";
       payoutHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      payoutHeaders["X-Api-Signature"] = signature(payoutUrl, payoutDetails);
+      payoutHeaders["X-Api-Signature"] = signature(transferUrl, payoutDetails);
 
       const payoutConfig = {
         method: "POST",
-        url: payoutUrl,
+        url: transferUrl,
         headers: payoutHeaders,
         data: payoutDetails,
       };
