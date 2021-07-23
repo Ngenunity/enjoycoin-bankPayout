@@ -30,9 +30,10 @@ exports.handler = async (event, context, callback) => {
       const timestamp = new Date().getTime();
       const timestampTwo = new Date().getTime();
       const timestampThree = new Date().getTime();
+      const timestampFour = new Date().getTime();
       const paymentUrl = `https://api.sendwyre.com/v2/paymentMethod/${bankAccountId}?timestamp=${timestampTwo}&masqueradeAs=${wyreId}`;
       const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestampThree}`;
-      const payoutUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestampThree}&masqueradeAs=${wyreId}`;
+      const payoutUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestampFour}&masqueradeAs=${wyreId}`;
       const accountUrl = `https://api.sendwyre.com/v3/accounts/${wyreId}?masqueradeAs=${wyreId}&timestamp=${timestamp}`;
 
       // Calculate request signature
