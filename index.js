@@ -28,8 +28,9 @@ exports.handler = async (event, context, callback) => {
 
       // Transfer ETH to destination
       const timestamp = new Date().getTime();
-      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}`;
-      const accTransferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}&masqueradeAs=${wyreId}`;
+      const timestampTwo = new Date().getTime();
+      const paymentUrl = `https://api.sendwyre.com/v2/paymentMethod/${bankAccountId}?timestamp=${timestampTwo}&masqueradeAs=${wyreId}`;
+      const transferUrl = `https://api.sendwyre.com/v3/transfers?timestamp=${timestamp}&masqueradeAs=${wyreId}`;
 
       // Calculate request signature
       const signature = (url, data) => {
@@ -43,37 +44,30 @@ exports.handler = async (event, context, callback) => {
         return token;
       };
 
-      const accBody = {
+      let bankEthAddress;
+
+      const paymentHeaders = {};
+      const paymentDetails = "";
+      paymentHeaders["Content-Type"] = "application/json";
+      paymentHeaders["X-Api-Key"] = secretObj.wyreAPI;
+      paymentHeaders["X-Api-Signature"] = signature(paymentUrl, paymentDetails);
+
+      const paymentConfig = {
+        method: "GET",
+        url: paymentUrl,
+        headers: paymentHeaders,
+      };
+
+      const paymentResponse = await axios(paymentConfig);
+      bankEthAddress = paymentResponse.data.blockchains.ETH;
+      console.log(paymentResponse);
+
+      const body = {
         source: `wallet:${walletId}`,
         sourceCurrency: "ETH",
         sourceAmount: sourceAmount,
-        dest: `account:${wyreId}`,
-        destCurrency: "USD",
-        autoConfirm: true,
-      };
-
-      const accDetails = JSON.stringify(accBody);
-      const accHeaders = {};
-      accHeaders["Content-Type"] = "application/json";
-      accHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      accHeaders["X-Api-Signature"] = signature(transferUrl, accDetails);
-
-      const accConfig = {
-        method: "POST",
-        url: transferUrl,
-        headers: accHeaders,
-        data: accDetails,
-      };
-
-      //const accTransferResponse = await axios(accConfig);
-      //console.log(accTransferResponse);
-
-      const body = {
-        source: `account:${wyreId}`,
-        sourceCurrency: "USD",
-        sourceAmount: 20,
-        dest: `paymentmethod:${bankAccountId}`,
-        destCurrency: "USD",
+        dest: `ethereum:${bankEthAddress}`,
+        destCurrency: "ETH",
         autoConfirm: true,
       };
 
@@ -81,24 +75,17 @@ exports.handler = async (event, context, callback) => {
       const transferHeaders = {};
       transferHeaders["Content-Type"] = "application/json";
       transferHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      transferHeaders["X-Api-Signature"] = signature(accTransferUrl, details);
+      transferHeaders["X-Api-Signature"] = signature(transferUrl, details);
 
       const transferConfig = {
         method: "POST",
-        url: accTransferUrl,
+        url: transferUrl,
         headers: transferHeaders,
         data: details,
       };
 
       const transferResponse = await axios(transferConfig);
       console.log(transferResponse);
-
-      /*
-      if (accTransferResponse.status == 200) {
-        console.log("Wallet to account transfer was successful!");
-        const transferResponse = await axios(transferConfig);
-        console.log(transferResponse);
-      }*/
 
       callback(null, {
         id: transferResponse.data.id,
