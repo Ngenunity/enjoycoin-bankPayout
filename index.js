@@ -93,6 +93,7 @@ exports.handler = async (event, context, callback) => {
         sourceAmount: payoutResponse.data.sourceAmount,
         source: payoutResponse.data.source,
         dest: payoutResponse.data.dest,
+        fee: payoutResponse.data.fee.ETH,
       });
     } catch (err) {
       console.log(err);
