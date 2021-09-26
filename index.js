@@ -102,6 +102,7 @@ exports.handler = async (event, context, callback) => {
   } else if (event.field == "confirmPayout") {
     try {
       const transferId = event.arguments.transferId;
+      const wyreId = event.arguments.wyreId;
       let secretObj;
 
       const secretRes = await secretClient
@@ -113,7 +114,7 @@ exports.handler = async (event, context, callback) => {
       }
 
       const timestamp = new Date().getTime();
-      const confirmUrl = `https://api.testwyre.com/v3/transfers/${transferId}/confirm?timestamp=${timestamp}`;
+      const confirmUrl = `https://api.testwyre.com/v3/transfers/${transferId}/confirm?timestamp=${timestamp}&masqueradeAs=${wyreId}`;
 
       const signature = (url) => {
         const dataToBeSigned = url;
