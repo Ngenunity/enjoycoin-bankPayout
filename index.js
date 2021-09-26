@@ -68,7 +68,7 @@ exports.handler = async (event, context, callback) => {
         sourceAmount: sourceAmount,
         dest: `ethereum:${bankEthAddress}`,
         destCurrency: "ETH",
-        autoConfirm: true,
+        autoConfirm: false,
       };
 
       const payoutDetails = JSON.stringify(payoutBody);
@@ -96,8 +96,60 @@ exports.handler = async (event, context, callback) => {
         fee: payoutResponse.data.fees.ETH,
       });
     } catch (err) {
-      console.log(err);
+      console.log("bankPayout error: ", err);
       //Create callback for errors
+    }
+  } else if (event.field == "confirmPayout") {
+    try {
+      const transferId = event.arguments.transferId;
+      let secretObj;
+
+      const secretRes = await secretClient
+        .getSecretValue({ SecretId: secretName })
+        .promise();
+
+      if ("SecretString" in secretRes) {
+        secretObj = JSON.parse(secretRes.SecretString);
+      }
+
+      const timestamp = new Date().getTime();
+      const confirmUrl = `https://api.testwyre.com/v3/transfers/${transferId}/confirm?timestamp=${timestamp}`;
+
+      const signature = (url) => {
+        const dataToBeSigned = url;
+        const token = cryptojs.enc.Hex.stringify(
+          cryptojs.HmacSHA256(
+            dataToBeSigned.toString(cryptojs.enc.Utf8),
+            secretObj.wyreSecret
+          )
+        );
+        return token;
+      };
+
+      const confirmHeaders = {};
+      confirmHeaders["Content-Type"] = "application/json";
+      confirmHeaders["X-Api-Key"] = secretObj.wyreAPI;
+      confirmHeaders["X-Api-Signature"] = signature(confirmUrl);
+
+      const confirmConfig = {
+        method: "POST",
+        url: confirmUrl,
+        headers: confirmHeaders,
+      };
+
+      const confirmResponse = await axios(confirmConfig);
+      console.log("confirm response: ", confirmResponse);
+
+      callback(null, {
+        id: confirmResponse.data.id,
+        status: confirmResponse.status,
+        sourceAmount: confirmResponse.data.sourceAmount,
+        source: confirmResponse.data.source,
+        dest: confirmResponse.data.dest,
+        fee: confirmResponse.data.fees.ETH,
+      });
+    } catch (err) {
+      console.log("confirm error: ", err);
     }
   }
 };
