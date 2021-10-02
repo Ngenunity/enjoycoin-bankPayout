@@ -50,14 +50,11 @@ exports.handler = async (event, context, callback) => {
       const paymentDetails = "";
       paymentHeaders["Content-Type"] = "application/json";
       paymentHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      paymentHeaders["X-Api-Signature"] = signature(
-        transferUrl,
-        paymentDetails
-      );
+      paymentHeaders["X-Api-Signature"] = signature(paymentUrl, paymentDetails);
 
       const paymentConfig = {
         method: "GET",
-        url: transferUrl,
+        url: paymentUrl,
         headers: paymentHeaders,
       };
 
@@ -78,11 +75,11 @@ exports.handler = async (event, context, callback) => {
       const payoutHeaders = {};
       payoutHeaders["Content-Type"] = "application/json";
       payoutHeaders["X-Api-Key"] = secretObj.wyreAPI;
-      payoutHeaders["X-Api-Signature"] = signature(paymentUrl, payoutDetails);
+      payoutHeaders["X-Api-Signature"] = signature(transferUrl, payoutDetails);
 
       const payoutConfig = {
         method: "POST",
-        url: paymentUrl,
+        url: transferUrl,
         headers: payoutHeaders,
         data: payoutDetails,
       };
