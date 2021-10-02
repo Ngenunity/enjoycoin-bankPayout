@@ -57,7 +57,7 @@ exports.handler = async (event, context, callback) => {
 
       const paymentConfig = {
         method: "GET",
-        url: paymentUrl,
+        url: transferUrl,
         headers: paymentHeaders,
       };
 
@@ -82,7 +82,7 @@ exports.handler = async (event, context, callback) => {
 
       const payoutConfig = {
         method: "POST",
-        url: transferUrl,
+        url: paymentUrl,
         headers: payoutHeaders,
         data: payoutDetails,
       };
