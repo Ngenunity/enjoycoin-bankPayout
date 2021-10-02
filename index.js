@@ -117,7 +117,7 @@ exports.handler = async (event, context, callback) => {
       }
 
       const timestamp = new Date().getTime();
-      const confirmUrl = `https://api.testwyre.com/v3/transfers/${transferId}/confirm?timestamp=${timestamp}&masqueradeAs=${wyreId}`;
+      const confirmUrl = `https://api.testwyre.com/v3/transfers/${transferId}/confirm?timestamp=${timestamp}`;
 
       const signature = (url) => {
         const dataToBeSigned = url;
